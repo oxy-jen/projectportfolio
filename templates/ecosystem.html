@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Ecosystem · Oxy-Jen Tech{% endblock %}
+{% block content %}
+{% from "_content_blocks.html" import render_blocks with context %}
+{{ render_blocks(page_blocks.get("top", [])) }}
+{{ render_blocks(page_blocks.get("hero", [])) }}
+{{ render_blocks(page_blocks.get("after_hero", [])) }}
+
+<section class="page-section" id="showcase">
+  {{ render_blocks(page_blocks.get("showcase_intro", [])) }}
+  <div class="video-grid">
+    {% if videos %}
+    {% for item in videos %}
+    <article class="video-card reveal">
+      {% if media_type(item.url) == "video" %}
+      <video muted autoplay loop playsinline preload="metadata" src="{{ item.url }}"></video>
+      {% elif media_type(item.url) == "image" %}
+      <img class="media-preview" src="{{ item.url }}" alt="{{ item.title }}">
+      {% endif %}
+      <h3>{{ item.title }}</h3>
+      <p>{{ item.description }}</p>
+    </article>
+    {% endfor %}
+    {% else %}
+    <article class="empty-state reveal">Showcase media will appear here as soon as it is added.</article>
+    {% endif %}
+  </div>
+</section>
+
+{{ render_blocks(page_blocks.get("main", [])) }}
+
+<section class="page-section split">
+  <div class="reveal">{{ render_blocks(page_blocks.get("challenges_intro", [])) }}</div>
+  <div class="challenge-stack reveal">
+    {% if challenges %}
+    {% for item in challenges %}
+    <article>
+      <span class="chip">{{ item.status or "Challenge" }}</span>
+      <strong>{{ item.title }}</strong>
+      <p>{{ item.description }}</p>
+      <button class="button glass vote-btn" type="button"><i data-lucide="thumbs-up"></i><span>0</span></button>
+    </article>
+    {% endfor %}
+    {% else %}
+    <article class="empty-state">Add challenge blocks from admin.</article>
+    {% endif %}
+  </div>
+</section>
+
+<section class="page-section">
+  {{ render_blocks(page_blocks.get("roadmap_intro", [])) }}
+  <div class="progress-grid">
+    {% for title, amount, status in [("UI Battle Arena Matchmaking System", 70, "In development"), ("AI Challenge Generator", 42, "Planning"), ("Developer Community Hub", 58, "Prototype")] %}
+    <article class="progress-card reveal" data-progress="{{ amount }}">
+      <span class="chip">{{ status }}</span>
+      <h3>{{ title }}</h3>
+      <div class="progress-track"><i></i></div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{{ render_blocks(page_blocks.get("bottom", [])) }}
+{% endblock %}

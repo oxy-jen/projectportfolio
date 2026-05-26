@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: oxy-jen-portfolio
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.4
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DB_PATH
+        value: /var/data/oxyjen.db
+      - key: UPLOAD_DIR
+        value: /var/data/uploads
+      - key: SMTP_USE_TLS
+        value: "1"
+    disk:
+      name: oxy-jen-data
+      mountPath: /var/data
+      sizeGB: 1

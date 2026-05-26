@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Admin · Oxy-Jen Tech{% endblock %}
+{% block content %}
+<section class="subhero page-section narrow">
+  <p class="eyebrow">Secure Admin</p>
+  <h1>Admin login</h1>
+  <p class="muted">Private access for managing Oxy-Jen Tech content and conversations.</p>
+  <form class="glass-form" method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Password<input type="password" name="password" required></label>
+    <button class="button primary" type="submit">Enter dashboard</button>
+  </form>
+</section>
+{% endblock %}

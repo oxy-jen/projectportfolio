@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}About · Oxy-Jen Tech{% endblock %}
+{% block content %}
+{% from "_content_blocks.html" import render_blocks with context %}
+{{ render_blocks(page_blocks.get("top", [])) }}
+{{ render_blocks(page_blocks.get("hero", [])) }}
+{{ render_blocks(page_blocks.get("after_hero", [])) }}
+
+<section class="page-section split">
+  <div class="reveal">{{ render_blocks(page_blocks.get("github_intro", [])) }}</div>
+  <div class="metric-grid reveal">
+    <article><strong>{{ gh.profile.public_repos }}</strong><span>Public repos</span></article>
+    <article><strong>{{ gh.repos|length }}</strong><span>Loaded projects</span></article>
+    <article><strong>{{ gh.profile.created_at[:4] }}</strong><span>GitHub since</span></article>
+    <article><strong>{{ gh.profile.followers }}</strong><span>Followers</span></article>
+  </div>
+</section>
+
+{{ render_blocks(page_blocks.get("main", [])) }}
+
+<section class="page-section split">
+  <div class="reveal">
+    {{ render_blocks(page_blocks.get("milestones_intro", [])) }}
+    <div class="achievement-list">
+      {% for item in achievements %}
+      <article>
+        <span class="chip">{{ item.status or "Milestone" }}</span>
+        <strong>{{ item.title }}</strong>
+        <p>{{ item.description }}</p>
+      </article>
+      {% else %}
+      <p class="muted">Achievements will appear here as they are added.</p>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="about-gallery reveal">
+    {% for item in about_photos %}
+      {% if media_type(item.url) == "image" %}
+      <img src="{{ item.url }}" alt="{{ item.title }}">
+      {% endif %}
+    {% else %}
+    <div class="empty-state">Upload about photos from the dashboard.</div>
+    {% endfor %}
+  </div>
+</section>
+
+{{ render_blocks(page_blocks.get("bottom", [])) }}
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Contact · Oxy-Jen Tech{% endblock %}
+{% block content %}
+{% from "_content_blocks.html" import render_blocks with context %}
+{{ render_blocks(page_blocks.get("top", [])) }}
+{{ render_blocks(page_blocks.get("hero", [])) }}
+{{ render_blocks(page_blocks.get("after_hero", [])) }}
+
+<section class="page-section contact-layout">
+  <form class="glass-form reveal" action="{{ url_for('contact') }}" method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    {{ render_blocks(page_blocks.get("form_intro", [])) }}
+    <label>Name<input name="name" autocomplete="name" required></label>
+    <label>Email<input type="email" name="email" autocomplete="email" required></label>
+    <label>Country name<input name="country_name" autocomplete="country-name" placeholder="Kenya"></label>
+    <label>Country code<input name="country_code" maxlength="2" placeholder="KE"></label>
+    <label>Subject<input name="subject" placeholder="Project, support, collaboration"></label>
+    <label>Message<textarea name="message" rows="6" required></textarea></label>
+    <button class="button primary" type="submit"><i data-lucide="send"></i>Send Message</button>
+  </form>
+
+  <aside class="contact-card reveal">
+    {{ render_blocks(page_blocks.get("direct_intro", [])) }}
+    <div class="find-me-card">
+      <strong>{{ country_flag(site_settings.country_code) }} Find me</strong>
+      <span>{{ site_settings.location_name }}, {{ site_settings.country_name }}</span>
+      <p>{{ site_settings.collaboration_note }}</p>
+    </div>
+    {% for item in public_contacts %}
+    <a href="{{ item.url }}" target="_blank" rel="noreferrer">
+      <strong>{{ item.label }}</strong>
+      <span>{{ item.note or item.url }}</span>
+    </a>
+    {% else %}
+    <p class="muted">Direct contact options will appear here soon.</p>
+    {% endfor %}
+  </aside>
+</section>
+{{ render_blocks(page_blocks.get("bottom", [])) }}
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Projects · Oxy-Jen Tech{% endblock %}
+{% block content %}
+{% from "_content_blocks.html" import render_blocks with context %}
+{{ render_blocks(page_blocks.get("top", [])) }}
+{{ render_blocks(page_blocks.get("hero", [])) }}
+{{ render_blocks(page_blocks.get("after_hero", [])) }}
+
+{% if managed_projects %}
+<section class="page-section">
+  {{ render_blocks(page_blocks.get("featured_intro", [])) }}
+  <div class="project-grid">
+    {% for item in managed_projects %}
+    <article class="project-card reveal">
+      {% if media_type(item.url) == "video" %}
+      <video class="media-preview" src="{{ item.url }}" muted autoplay loop playsinline preload="metadata"></video>
+      {% elif media_type(item.url) == "image" %}
+      <img class="media-preview" src="{{ item.url }}" alt="{{ item.title }}">
+      {% endif %}
+      <span class="chip">{{ item.status or "Managed" }}</span>
+      <h3>{{ item.title }}</h3>
+      <p>{{ item.description }}</p>
+      {% if item.url %}<a class="button glass" href="{{ item.url }}" target="_blank" rel="noreferrer">Open asset</a>{% endif %}
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{{ render_blocks(page_blocks.get("main", [])) }}
+
+<section class="page-section">
+  {{ render_blocks(page_blocks.get("github_intro", [])) }}
+  <div class="project-grid wide">
+    {% for repo in gh.repos %}
+    <article class="project-card reveal">
+      <div class="project-preview">
+        <i data-lucide="{{ 'swords' if 'battle' in repo.name.lower() else 'layout-dashboard' }}"></i>
+      </div>
+      <span class="chip">{{ "Forked repo" if repo.fork else "Public repo" }}</span>
+      <h3>{{ repo.name }}</h3>
+      <p>{{ repo.description or "No GitHub description yet." }}</p>
+      <ul>
+        <li>Language: {{ repo.language or "Not detected" }}</li>
+        <li>Stars: {{ repo.stargazers_count }}</li>
+        <li>Last push: {{ relative_time(repo.pushed_at) }}</li>
+        <li>GitHub Pages: {{ "enabled" if repo.has_pages else "not enabled" }}</li>
+      </ul>
+      <div class="actions small">
+        <a class="button primary" href="{{ repo.homepage or repo.html_url }}" target="_blank" rel="noreferrer">Live Demo</a>
+        <a class="button glass" href="{{ repo.html_url }}" target="_blank" rel="noreferrer">View GitHub</a>
+        <button class="button quiet details-btn" data-title="{{ repo.name }}" data-description="{{ repo.description or 'No repository description has been added yet.' }}" data-language="{{ repo.language or 'Not detected' }}" data-updated="{{ repo.pushed_at }}">Details</button>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{{ render_blocks(page_blocks.get("bottom", [])) }}
+<dialog class="modal" id="projectModal">
+  <button class="modal-close" id="modalClose" aria-label="Close"><i data-lucide="x"></i></button>
+  <div id="modalBody"></div>
+</dialog>
+{% endblock %}

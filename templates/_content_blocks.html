@@ -1,0 +1,110 @@
+{% macro render_media_url(item, url, class_name="") %}
+  {% if media_type(url) == "video" %}
+  <video class="{{ class_name }}" src="{{ url }}" playsinline preload="metadata"
+    {% if item.media_behavior in ["autoplay", "scroll", "cursor"] %}muted loop{% endif %}
+    {% if item.media_behavior == "autoplay" %}autoplay{% endif %}
+    {% if item.media_behavior == "manual" %}controls{% endif %}
+    data-media-behavior="{{ item.media_behavior or 'scroll' }}"></video>
+  {% elif media_type(url) == "image" %}
+  <img class="{{ class_name }}" src="{{ url }}" alt="{{ item.title }}">
+  {% endif %}
+{% endmacro %}
+
+{% macro render_media(item, class_name="") %}
+  {{ render_media_url(item, item.url, class_name) }}
+{% endmacro %}
+
+{% macro render_copy(item, heading="h3") %}
+  <div class="block-copy text-{{ item.text_align or 'left' }} font-{{ item.font_family or 'default' }}" {% if item.text_color %}style="color: {{ item.text_color }}"{% endif %}>
+    <span class="chip">{{ item.status or "Published" }}</span>
+    {% if heading == "h2" %}<h2 class="{{ 'typing-text' if item.text_effect == 'typing' else '' }}" data-text-effect="{{ item.text_effect or 'normal' }}">{{ item.title }}</h2>{% else %}<h3 class="{{ 'typing-text' if item.text_effect == 'typing' else '' }}" data-text-effect="{{ item.text_effect or 'normal' }}">{{ item.title }}</h3>{% endif %}
+    {% if item.subtitle %}<strong class="block-subtitle">{{ item.subtitle }}</strong>{% endif %}
+    <p>{{ item.description }}</p>
+    {% if item.button_url %}
+    <a class="button primary" href="{{ item.button_url }}" target="_blank" rel="noreferrer">{{ item.button_label or "Open" }}</a>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro render_blocks(items, title="") %}
+  {% if items %}
+  {% set first = items[0] %}
+  <section class="page-section dynamic-section dynamic-{{ first.layout or 'card' }}">
+    {% if title %}
+    <div class="section-heading reveal">
+      <p class="eyebrow">Admin Selected</p>
+      <h2>{{ title }}</h2>
+    </div>
+    {% endif %}
+
+    {% if first.layout in ["carousel_vertical", "infinite_carousel"] %}
+    <div class="{{ 'infinite-carousel' if first.layout == 'infinite_carousel' else 'vertical-carousel' }} reveal"
+      data-carousel
+      data-carousel-direction="{{ first.carousel_direction or 'left' }}"
+      data-display-seconds="{{ first.display_seconds or 0 }}"
+      data-pause-seconds="{{ first.pause_seconds or 0 }}"
+      data-media-behavior="{{ first.media_behavior or 'scroll' }}">
+      <div class="{{ 'infinite-carousel-track' if first.layout == 'infinite_carousel' else 'vertical-carousel-track' }}">
+        {% for item in items + items %}
+        <article class="carousel-panel">
+          {% set assets = content_assets(item) %}
+          {% if assets %}
+            {{ render_media_url(item, assets[0], "carousel-media") }}
+          {% endif %}
+          {{ render_copy(item) }}
+        </article>
+        {% for asset in content_assets(item)[1:] %}
+        <article class="carousel-panel asset-only">
+          {{ render_media_url(item, asset, "carousel-media") }}
+        </article>
+        {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+    {% elif first.layout in ["text_block", "rotating_header"] %}
+    <div class="text-block-stack" data-rotating-blocks="{{ 'true' if first.layout == 'rotating_header' else 'false' }}">
+      {% for item in items %}
+      <article class="editable-text-block reveal {{ 'transparent-block' if item.transparent_bg else '' }}" style="{{ content_style(item) }}" data-display-seconds="{{ item.display_seconds or 0 }}" data-pause-seconds="{{ item.pause_seconds or 0 }}">
+        {{ render_copy(item, "h2") }}
+      </article>
+      {% endfor %}
+    </div>
+    {% elif first.layout == "html_card" %}
+    <div class="html-card-grid">
+      {% for item in items %}
+      <article class="html-card reveal {{ 'transparent-block' if item.transparent_bg else '' }}" style="{{ content_style(item) }}">
+        {{ render_copy(item) }}
+        {% if item.html_content %}<div class="admin-html-content">{{ item.html_content|safe }}</div>{% endif %}
+      </article>
+      {% endfor %}
+    </div>
+    {% elif first.layout == "media_split" %}
+    {% for item in items %}
+    <article class="admin-split-block reveal {{ 'transparent-block' if item.transparent_bg else '' }}" style="{{ content_style(item) }}">
+      {% set assets = content_assets(item) %}
+      {% if assets %}{{ render_media_url(item, assets[0], "admin-split-media") }}{% endif %}
+      {{ render_copy(item, "h2") }}
+    </article>
+    {% endfor %}
+    {% elif first.layout == "hero_banner" %}
+    {% for item in items %}
+    <article class="admin-hero-banner reveal {{ 'transparent-block' if item.transparent_bg else '' }}" style="{{ content_style(item) }}">
+      {% set assets = content_assets(item) %}
+      {% if assets %}{{ render_media_url(item, assets[0], "admin-banner-media") }}{% endif %}
+      {{ render_copy(item, "h2") }}
+    </article>
+    {% endfor %}
+    {% else %}
+    <div class="project-grid">
+      {% for item in items %}
+      <article class="project-card reveal {{ 'transparent-block' if item.transparent_bg else '' }}" style="{{ content_style(item) }}">
+        {% set assets = content_assets(item) %}
+        {% if assets %}{{ render_media_url(item, assets[0], "media-preview") }}{% endif %}
+        {{ render_copy(item) }}
+      </article>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
+  {% endif %}
+{% endmacro %}

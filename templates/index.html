@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+{% from "_content_blocks.html" import render_blocks with context %}
+{{ render_blocks(page_blocks.get("top", [])) }}
+{{ render_blocks(page_blocks.get("hero", [])) }}
+{{ render_blocks(page_blocks.get("after_hero", [])) }}
+
+<section class="page-section split" id="about">
+  <div class="reveal">{{ render_blocks(page_blocks.get("about_intro", [])) }}</div>
+  <div class="metric-grid reveal">
+    <article><strong>{{ gh.profile.public_repos }}</strong><span>Public repos</span></article>
+    <article><strong>{{ gh.repos|length }}</strong><span>Loaded projects</span></article>
+    <article><strong>{{ gh.profile.created_at[:4] }}</strong><span>GitHub since</span></article>
+    <article><strong>{{ gh.profile.following }}</strong><span>Following</span></article>
+  </div>
+</section>
+{{ render_blocks(page_blocks.get("after_about", [])) }}
+
+{% if achievements %}
+<section class="page-section">
+  <div class="achievement-list">
+    {% for item in achievements %}
+    <article class="reveal">
+      <span class="chip">{{ item.status or "Milestone" }}</span>
+      <strong>{{ item.title }}</strong>
+      <p>{{ item.description }}</p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{{ render_blocks(page_blocks.get("main", [])) }}
+
+<section class="page-section terminal-wrap" id="terminal">
+  {{ render_blocks(page_blocks.get("terminal_intro", [])) }}
+  <div class="terminal reveal" data-terminal>
+    <div class="terminal-head">
+      <span class="traffic"><i></i><i></i><i></i></span>
+      <strong>oxy-jen@flask ~ %</strong>
+    </div>
+    <pre><code id="typedCode" class="language-python"></code><b class="code-cursor"></b></pre>
+  </div>
+</section>
+
+<section class="page-section">
+  {{ render_blocks(page_blocks.get("github_intro", [])) }}
+  <div class="project-grid">
+    {% for repo in gh.repos[:3] %}
+    <article class="project-card reveal">
+      <span class="chip">{{ "Fork" if repo.fork else "Source" }}</span>
+      <h3>{{ repo.name }}</h3>
+      <p>{{ repo.description or "No GitHub description yet." }}</p>
+      <div class="tag-row">
+        <span>{{ repo.language or "Code" }}</span>
+        <span>{{ repo.stargazers_count }} stars</span>
+        <span>Pushed {{ relative_time(repo.pushed_at) }}</span>
+      </div>
+      <div class="actions small">
+        <a class="button glass" href="{{ repo.html_url }}" target="_blank" rel="noreferrer">View GitHub</a>
+        <a class="button quiet" href="{{ url_for('projects') }}">Details</a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="page-section split">
+  <div class="github-panel reveal">
+    {{ render_blocks(page_blocks.get("github_data_intro", [])) }}
+    <div class="activity-list">
+      {% for event in gh.events[:4] %}
+      <article>
+        <span class="live-dot"></span>
+        <strong>{{ event.type.replace("Event", "") if event.type else "GitHub activity" }}</strong>
+        <small>{{ event.repo.name if event.repo else github_user }} · {{ relative_time(event.created_at) }}</small>
+      </article>
+      {% else %}
+      <article><span class="live-dot"></span><strong>No recent public events returned</strong><small>GitHub API fallback is active.</small></article>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="chart-card reveal">
+    <canvas id="languageChart" data-languages='{{ gh.languages|tojson }}'></canvas>
+  </div>
+</section>
+
+<section class="page-section" id="testimonials">
+  {{ render_blocks(page_blocks.get("testimonials_intro", [])) }}
+  <div class="testimonial-grid">
+    {% for item in testimonials %}
+    <article class="testimonial reveal">
+      <strong>{{ item.name }}</strong><span>{{ country_flag(item.country_code) }} {{ item.role }}{% if item.country_name %} · {{ item.country_name }}{% endif %}</span>
+      <p>{{ item.quote }}</p>
+    </article>
+    {% else %}
+    <article class="empty-state reveal">No approved testimonials yet.</article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="page-section contact" id="contact">
+  <div class="reveal">{{ render_blocks(page_blocks.get("contact_intro", [])) }}</div>
+  <div class="contact-card reveal">
+    {% for item in public_contacts %}
+    <a href="{{ item.url }}" target="_blank" rel="noreferrer"><strong>{{ item.label }}</strong><span>{{ item.note }}</span></a>
+    {% else %}
+    <p class="muted">Contact links will appear here after you add them in admin.</p>
+    {% endfor %}
+  </div>
+</section>
+{{ render_blocks(page_blocks.get("bottom", [])) }}
+{% endblock %}

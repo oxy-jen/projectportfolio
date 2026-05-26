@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Oxy-Jen Tech{% endblock %}
+{% block content %}
+{% set kind_options = [("header", "Timed header / headline"), ("text", "Designed text block"), ("html", "HTML card"), ("carousel", "Infinite carousel"), ("project", "Project"), ("video", "Video"), ("challenge", "Challenge"), ("homepage", "Homepage section"), ("about_photo", "About / landing big photo"), ("achievement", "Achievement"), ("system_block", "Existing page text")] %}
+{% set page_options = [("home", "Landing / Home"), ("about", "About"), ("projects", "Projects"), ("ecosystem", "Ecosystem"), ("community", "Community"), ("contact", "Contact"), ("all", "All public pages")] %}
+{% set slot_options = [("hero", "Page hero"), ("after_hero", "After hero"), ("top", "Very top"), ("after_about", "Home: after about"), ("about_intro", "Home: about intro"), ("terminal_intro", "Home: code intro"), ("github_intro", "GitHub/projects intro"), ("github_data_intro", "Home: GitHub data intro"), ("testimonials_intro", "Testimonials intro"), ("contact_intro", "Home: contact intro"), ("featured_intro", "Projects: featured intro"), ("showcase_intro", "Ecosystem: showcase intro"), ("challenges_intro", "Ecosystem: challenges intro"), ("roadmap_intro", "Ecosystem: roadmap intro"), ("form_intro", "Form intro"), ("direct_intro", "Contact: direct links intro"), ("milestones_intro", "About: milestones intro"), ("main", "Middle / main area"), ("bottom", "Bottom")] %}
+{% set layout_options = [("text_block", "Designed text"), ("rotating_header", "Timed rotating header"), ("html_card", "HTML card"), ("infinite_carousel", "Infinite scrolling carousel"), ("card", "Cards grid"), ("media_split", "Image/video beside text"), ("hero_banner", "Full banner"), ("carousel_vertical", "Vertical carousel")] %}
+{% set media_options = [("scroll", "React when scrolled into view"), ("autoplay", "Autoplay muted"), ("cursor", "React to cursor hover"), ("manual", "Manual controls")] %}
+{% set effect_options = [("normal", "Normal"), ("typing", "Typing effect"), ("fade", "Fade in"), ("code", "Code styled")] %}
+{% set font_options = [("default", "Default"), ("display", "Display"), ("code", "Code / monospace")] %}
+{% set align_options = [("left", "Left"), ("center", "Center"), ("right", "Right")] %}
+{% set direction_options = [("left", "Left"), ("right", "Right"), ("up", "Up"), ("down", "Down")] %}
+<section class="subhero page-section">
+  <p class="eyebrow">Private Admin Dashboard</p>
+  <h1>Control room for Oxy-Jen Tech.</h1>
+  <p class="muted">Manage messages, replies, contact links, location details, uploaded images, projects, challenges, testimonials, and homepage sections.</p>
+  <a class="button glass" href="{{ url_for('admin_logout') }}">Logout</a>
+</section>
+
+<section class="page-section admin-stack">
+  <div class="admin-panel">
+    <h2>Message Inbox</h2>
+    {% for item in messages %}
+    <article class="admin-message {{ 'flagged' if item.flagged else '' }}">
+      <div class="thread-top">
+        <strong>{{ item.name }} · {{ item.subject or "No subject" }}</strong>
+        <span class="chip">{{ country_flag(item.country_code) }} {{ item.status }}{% if item.reply_sent %} · sent{% endif %}</span>
+      </div>
+      <p>{{ item.message }}</p>
+      <small>{{ item.email }}{% if item.country_name %} · {{ item.country_name }}{% endif %} · {{ relative_time(item.created_at) }}</small>
+      {% if item.reply %}
+      <div class="reply-box"><strong>Saved reply</strong><p>{{ item.reply }}</p></div>
+      {% endif %}
+      <form method="post" class="inline-form">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <input type="hidden" name="id" value="{{ item.id }}">
+        <label>Status
+          <select name="status">
+            {% for status in ["new", "read", "replied", "archived"] %}
+            <option value="{{ status }}" {{ "selected" if item.status == status else "" }}>{{ status }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="check-line"><input type="checkbox" name="flagged" {{ "checked" if item.flagged else "" }}> Flag for follow-up</label>
+        <button class="button glass" name="action" value="message_status">Update</button>
+      </form>
+      <form method="post" class="reply-form">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <input type="hidden" name="id" value="{{ item.id }}">
+        <input type="hidden" name="send_now" value="0">
+        <label>Reply draft
+          <textarea name="reply" rows="4">{{ item.reply or ("Hello " ~ item.name ~ ",\n\nThank you for reaching out to Oxy-Jen Tech. ") }}</textarea>
+        </label>
+        <button class="button glass" name="action" value="reply_message">Save reply</button>
+        <button class="button primary" name="action" value="reply_message" onclick="this.form.send_now.value='1'">Send email now</button>
+        <a class="button quiet" href="mailto:{{ item.email }}?subject={{ ('Reply from Oxy-Jen Tech: ' ~ (item.subject or 'Your message'))|urlencode }}&body={{ (item.reply or ('Hello ' ~ item.name ~ ',\n\nThank you for reaching out to Oxy-Jen Tech.'))|urlencode }}">Open email app</a>
+      </form>
+    </article>
+    {% else %}<p class="muted">No visitor messages yet.</p>{% endfor %}
+  </div>
+
+  <div class="admin-grid">
+    <form class="glass-form" method="post">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <input type="hidden" name="action" value="site_settings">
+      <h2>Global page text</h2>
+      <label>Brand name<input name="brand_name" value="{{ site_settings.brand_name }}" placeholder="Oxy-Jen Tech"></label>
+      <label>Footer bio<textarea name="footer_bio" rows="3">{{ site_settings.footer_bio }}</textarea></label>
+      <label>Nav: Home<input name="nav_home" value="{{ site_settings.nav_home }}"></label>
+      <label>Nav: About<input name="nav_about" value="{{ site_settings.nav_about }}"></label>
+      <label>Nav: Projects<input name="nav_projects" value="{{ site_settings.nav_projects }}"></label>
+      <label>Nav: Ecosystem<input name="nav_ecosystem" value="{{ site_settings.nav_ecosystem }}"></label>
+      <label>Nav: Community<input name="nav_community" value="{{ site_settings.nav_community }}"></label>
+      <label>Nav: Contact<input name="nav_contact" value="{{ site_settings.nav_contact }}"></label>
+      <label>Nav: GitHub<input name="nav_github" value="{{ site_settings.nav_github }}"></label>
+      <label>Location/place<input name="location_name" value="{{ site_settings.location_name }}" placeholder="Nairobi, Kenya"></label>
+      <label>Country name<input name="country_name" value="{{ site_settings.country_name }}" placeholder="Kenya"></label>
+      <label>Country code<input name="country_code" maxlength="2" value="{{ site_settings.country_code }}" placeholder="KE"></label>
+      <label>Collaborate note<textarea name="collaboration_note" rows="3">{{ site_settings.collaboration_note }}</textarea></label>
+      <label>About heading<input name="about_heading" value="{{ site_settings.about_heading }}"></label>
+      <label>About story<textarea name="about_story" rows="5">{{ site_settings.about_story }}</textarea></label>
+      <button class="button primary" type="submit">Save site details</button>
+    </form>
+
+    <form class="glass-form" method="post">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <input type="hidden" name="action" value="contact_link">
+      <h2>Add contact link</h2>
+      <label>Label<input name="label" placeholder="WhatsApp, Email, LinkedIn, Office" required></label>
+      <label>URL<input name="url" placeholder="https://wa.me/... or https://maps.google.com/..." required></label>
+      <label>Note<input name="note" placeholder="Direct WhatsApp line, Nairobi office, booking link"></label>
+      <label>Sort order<input name="sort_order" type="number" value="0"></label>
+      <label class="check-line"><input type="checkbox" name="visible" checked> Show publicly</label>
+      <button class="button primary" type="submit">Publish contact</button>
+    </form>
+
+    <form class="glass-form" method="post">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <input type="hidden" name="action" value="security_email">
+      <h2>Security & email</h2>
+      <label>Current admin password<input name="current_password" type="password" autocomplete="current-password" placeholder="Required only when changing password"></label>
+      <label>New admin password<input name="new_admin_password" type="password" autocomplete="new-password" minlength="10" placeholder="At least 10 characters"></label>
+      <label>Confirm new password<input name="confirm_admin_password" type="password" autocomplete="new-password"></label>
+      <label>SMTP host<input name="smtp_host" value="{{ site_settings.smtp_host }}" placeholder="smtp.gmail.com"></label>
+      <label>SMTP port<input name="smtp_port" type="number" value="{{ site_settings.smtp_port or 587 }}"></label>
+      <label>SMTP username<input name="smtp_username" value="{{ site_settings.smtp_username }}" autocomplete="username" placeholder="your@email.com"></label>
+      <label>SMTP password<input name="smtp_password" type="password" autocomplete="new-password" placeholder="Leave blank to keep existing password"></label>
+      <label>From email<input name="smtp_from" value="{{ site_settings.smtp_from }}" placeholder="your@email.com"></label>
+      <label>Admin notification email<input name="smtp_admin_email" value="{{ site_settings.smtp_admin_email }}" placeholder="where contact messages should go"></label>
+      <label class="check-line"><input type="checkbox" name="smtp_use_tls" value="1" {{ "checked" if site_settings.smtp_use_tls != "0" else "" }}> Use TLS</label>
+      <button class="button primary" type="submit">Save security & email</button>
+    </form>
+
+    <form class="glass-form content-composer" method="post" enctype="multipart/form-data" data-content-preview-form>
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <input type="hidden" name="action" value="content">
+      <h2>Add site content</h2>
+      <label>Type
+        <select name="kind">
+          {% for value, label in kind_options %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Show on page
+        <select name="page">
+          {% for value, label in page_options %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Placement slot
+        <select name="slot">
+          {% for value, label in slot_options %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Layout template
+        <select name="layout">
+          {% for value, label in layout_options %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Video/reaction trigger
+        <select name="media_behavior">
+          {% for value, label in media_options %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Title<input name="title" required></label>
+      <label>Subtitle<input name="subtitle" placeholder="Optional supporting line"></label>
+      <label>Description<textarea name="description" rows="4"></textarea></label>
+      <label>Text effect
+        <select name="text_effect">
+          {% for value, label in effect_options %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Font style
+        <select name="font_family">
+          {% for value, label in font_options %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Text alignment
+        <select name="text_align">
+          {% for value, label in align_options %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Text color<input name="text_color" type="color" value="#fffaf2"></label>
+      <label>Status<input name="status" placeholder="Planning, Live, Demo, In development"></label>
+      <label>Asset URL<input name="url" placeholder="https://..."></label>
+      <label>Extra asset URLs<textarea name="asset_urls" rows="3" placeholder="One image/video URL per line"></textarea></label>
+      <label>Select images/videos<input type="file" name="assets" accept="image/*,video/*" multiple></label>
+      <label>Transparent background image URL<input name="background_url" placeholder="Optional transparent PNG/WebP background"></label>
+      <label class="check-line"><input type="checkbox" name="transparent_bg"> Transparent card/background</label>
+      <label>HTML card content<textarea name="html_content" rows="5" placeholder="<div>Custom admin HTML</div>"></textarea></label>
+      <label>Button label<input name="button_label" placeholder="View, Book, Collaborate"></label>
+      <label>Button URL<input name="button_url" placeholder="https://..."></label>
+      <label>Start showing<input name="starts_at" type="datetime-local"></label>
+      <label>Stop showing (optional)<input name="ends_at" type="datetime-local"></label>
+      <label>Display seconds<input name="display_seconds" type="number" min="0" value="0" placeholder="0 means continuous"></label>
+      <label>Pause seconds<input name="pause_seconds" type="number" min="0" value="0"></label>
+      <label>Carousel direction
+        <select name="carousel_direction">
+          {% for value, label in direction_options %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Sort order<input name="sort_order" type="number" value="0"></label>
+      <label class="check-line"><input type="checkbox" name="visible" checked> Visible now</label>
+      <button class="button primary" type="submit">Save content</button>
+    </form>
+
+    <aside class="admin-live-preview" data-content-preview>
+      <div class="thread-top">
+        <strong>Live preview</strong>
+        <span class="chip" data-preview-meta>Home · Page hero</span>
+      </div>
+      <div class="preview-stage" data-preview-stage>
+        <article class="preview-card">
+          <span class="chip" data-preview-status>Draft</span>
+          <h3 data-preview-title>Start typing a title</h3>
+          <strong data-preview-subtitle></strong>
+          <p data-preview-description>Your block preview appears here before you save it.</p>
+          <div data-preview-media></div>
+          <div data-preview-html></div>
+          <a class="button primary" data-preview-button hidden></a>
+        </article>
+      </div>
+      <div class="page-preview-shell">
+        <div class="thread-top">
+          <strong>Current page</strong>
+          <a class="button quiet" data-page-preview-link href="{{ url_for('home') }}" target="_blank" rel="noreferrer">Open full page</a>
+        </div>
+        <iframe data-page-preview-frame src="{{ url_for('home') }}" title="Current page preview"></iframe>
+      </div>
+      <p class="muted">This preview follows your selected layout, effect, text alignment, color, background, media, and carousel direction before publishing.</p>
+    </aside>
+
+    <form class="glass-form" method="post">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <input type="hidden" name="action" value="testimonial">
+      <h2>Add real testimonial</h2>
+      <label>Name<input name="name" required></label>
+      <label>Role<input name="role" required></label>
+      <label>Country name<input name="country_name" placeholder="Kenya"></label>
+      <label>Country code<input name="country_code" maxlength="2" placeholder="KE"></label>
+      <label>Quote<textarea name="quote" rows="4" required></textarea></label>
+      <label>Rating<input name="rating" type="number" min="1" max="5" value="5"></label>
+      <label class="check-line"><input type="checkbox" name="recommended" checked> Recommend on top</label>
+      <button class="button primary" type="submit">Publish testimonial</button>
+    </form>
+
+    <div class="admin-panel">
+      <h2>Public contact links</h2>
+      {% for item in contacts %}
+      <article>
+        <strong>{{ item.label }}</strong>
+        <p>{{ item.note }} · {{ "visible" if item.visible else "hidden" }}</p>
+        <form method="post">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <input type="hidden" name="id" value="{{ item.id }}">
+          <button class="button quiet" name="action" value="delete_contact">Delete</button>
+        </form>
+      </article>
+      {% else %}<p class="muted">No contact links yet.</p>{% endfor %}
+    </div>
+
+    <div class="admin-panel">
+      <h2>Testimonials</h2>
+      {% for item in testimonials %}
+      <article>
+        <strong>{{ country_flag(item.country_code) }} {{ item.name }} · {{ item.role }}</strong>
+        <p>{{ item.quote }}</p>
+        <form method="post" class="inline-form">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <input type="hidden" name="id" value="{{ item.id }}">
+          <label class="check-line"><input type="checkbox" name="approved" {{ "checked" if item.approved else "" }}> Approved</label>
+          <label class="check-line"><input type="checkbox" name="recommended" {{ "checked" if item.recommended else "" }}> Recommended</label>
+          <label class="check-line"><input type="checkbox" name="flagged" {{ "checked" if item.flagged else "" }}> Flagged</label>
+          <button class="button glass" name="action" value="testimonial_status">Save</button>
+        </form>
+      </article>
+      {% else %}<p class="muted">No testimonials yet.</p>{% endfor %}
+    </div>
+
+    <div class="admin-panel">
+      <h2>Pending community comments</h2>
+      {% for item in pending %}
+      <article>
+        <strong>{{ country_flag(item.country_code) }} {{ item.name }}</strong>
+        <p>{{ item.message }}</p>
+        <form method="post">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <input type="hidden" name="id" value="{{ item.id }}">
+          <button class="button glass" name="action" value="approve_comment">Approve</button>
+          <button class="button quiet" name="action" value="delete_comment">Delete</button>
+        </form>
+      </article>
+      {% else %}<p class="muted">No pending comments.</p>{% endfor %}
+    </div>
+
+    <div class="admin-panel">
+      <h2>Managed content</h2>
+      {% for item in content %}
+      <article class="managed-content-item">
+        <strong>{{ item.kind }} · {{ item.title }}</strong>
+        <span class="chip">{{ item.page or "home" }} · {{ item.slot or "main" }} · {{ item.layout or "card" }}</span>
+        <p>{{ item.description }}</p>
+        <details class="edit-details">
+          <summary class="button glass">Edit this block</summary>
+          <form method="post" enctype="multipart/form-data" class="inline-form" data-content-preview-form>
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <input type="hidden" name="id" value="{{ item.id }}">
+            <label>Type
+              <select name="kind">
+                {% for value, label in kind_options %}<option value="{{ value }}" {{ "selected" if item.kind == value else "" }}>{{ label }}</option>{% endfor %}
+              </select>
+            </label>
+            <label>Page
+              <select name="page">
+                {% for value, label in page_options %}<option value="{{ value }}" {{ "selected" if (item.page or 'home') == value else "" }}>{{ label }}</option>{% endfor %}
+              </select>
+            </label>
+            <label>Slot
+              <select name="slot">
+                {% for value, label in slot_options %}<option value="{{ value }}" {{ "selected" if (item.slot or 'main') == value else "" }}>{{ label }}</option>{% endfor %}
+              </select>
+            </label>
+            <label>Layout
+              <select name="layout">
+                {% for value, label in layout_options %}<option value="{{ value }}" {{ "selected" if (item.layout or 'card') == value else "" }}>{{ label }}</option>{% endfor %}
+              </select>
+            </label>
+            <label>Video/reaction trigger
+              <select name="media_behavior">
+                {% for value, label in media_options %}<option value="{{ value }}" {{ "selected" if (item.media_behavior or 'scroll') == value else "" }}>{{ label }}</option>{% endfor %}
+              </select>
+            </label>
+            <label>Title<input name="title" value="{{ item.title }}" required></label>
+            <label>Subtitle<input name="subtitle" value="{{ item.subtitle or '' }}"></label>
+            <label>Description<textarea name="description" rows="4">{{ item.description or '' }}</textarea></label>
+            <label>Text effect
+              <select name="text_effect">
+                {% for value, label in effect_options %}<option value="{{ value }}" {{ "selected" if (item.text_effect or 'normal') == value else "" }}>{{ label }}</option>{% endfor %}
+              </select>
+            </label>
+            <label>Font
+              <select name="font_family">
+                {% for value, label in font_options %}<option value="{{ value }}" {{ "selected" if (item.font_family or 'default') == value else "" }}>{{ label }}</option>{% endfor %}
+              </select>
+            </label>
+            <label>Align
+              <select name="text_align">
+                {% for value, label in align_options %}<option value="{{ value }}" {{ "selected" if (item.text_align or 'left') == value else "" }}>{{ label }}</option>{% endfor %}
+              </select>
+            </label>
+            <label>Text color<input name="text_color" value="{{ item.text_color or '' }}"></label>
+            <label>Status<input name="status" value="{{ item.status or '' }}"></label>
+            <label>Primary asset URL<input name="url" value="{{ item.url or '' }}"></label>
+            <label>Replace/add selected files<input type="file" name="assets" accept="image/*,video/*" multiple></label>
+            <label>Background URL<input name="background_url" value="{{ item.background_url or '' }}"></label>
+            <label class="check-line"><input type="checkbox" name="transparent_bg" {{ "checked" if item.transparent_bg else "" }}> Transparent background</label>
+            <label>HTML<textarea name="html_content" rows="4">{{ item.html_content or '' }}</textarea></label>
+            <label>Button label<input name="button_label" value="{{ item.button_label or '' }}"></label>
+            <label>Button URL<input name="button_url" value="{{ item.button_url or '' }}"></label>
+            <label>Start<input name="starts_at" type="datetime-local" value="{{ item.starts_at or '' }}"></label>
+            <label>Stop optional<input name="ends_at" type="datetime-local" value="{{ item.ends_at or '' }}"></label>
+            <label>Display seconds<input name="display_seconds" type="number" min="0" value="{{ item.display_seconds or 0 }}"></label>
+            <label>Pause seconds<input name="pause_seconds" type="number" min="0" value="{{ item.pause_seconds or 0 }}"></label>
+            <label>Carousel direction
+              <select name="carousel_direction">
+                {% for value, label in direction_options %}<option value="{{ value }}" {{ "selected" if (item.carousel_direction or 'left') == value else "" }}>{{ label }}</option>{% endfor %}
+              </select>
+            </label>
+            <label>Sort order<input name="sort_order" type="number" value="{{ item.sort_order or 0 }}"></label>
+            <label class="check-line"><input type="checkbox" name="visible" {{ "checked" if item.visible else "" }}> Visible</label>
+            <button class="button primary" name="action" value="content_update">Save edits</button>
+          </form>
+        </details>
+        <form method="post">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <input type="hidden" name="id" value="{{ item.id }}">
+          <button class="button quiet" name="action" value="delete_content">Delete</button>
+        </form>
+      </article>
+      {% else %}<p class="muted">No managed content yet.</p>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

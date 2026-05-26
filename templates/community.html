@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Community · Oxy-Jen Tech{% endblock %}
+{% block content %}
+{% from "_content_blocks.html" import render_blocks with context %}
+{{ render_blocks(page_blocks.get("top", [])) }}
+{{ render_blocks(page_blocks.get("hero", [])) }}
+{{ render_blocks(page_blocks.get("after_hero", [])) }}
+
+<section class="page-section community-layout">
+  <div class="thread-list">
+    {% for item in comments %}
+    <article class="thread reveal">
+      <strong>{{ item.name }}</strong>
+      {% if item.country_code or item.country_name %}<span class="country-line">{{ country_flag(item.country_code) }} {{ item.country_name }}</span>{% endif %}
+      <p>{{ item.message }}</p>
+      <small>{{ relative_time(item.created_at) }}</small>
+    </article>
+    {% else %}
+    <article class="empty-state reveal">No public notes yet.</article>
+    {% endfor %}
+  </div>
+  <form class="glass-form reveal" method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    {{ render_blocks(page_blocks.get("form_intro", [])) }}
+    <label>Name<input name="name" required></label>
+    <label>Email<input type="email" name="email" placeholder="Required for private replies"></label>
+    <label>Country name<input name="country_name" placeholder="Kenya, United States, Nigeria"></label>
+    <label>Country code<input name="country_code" maxlength="2" placeholder="KE"></label>
+    <label>Role for testimonial<input name="role" placeholder="Designer, Founder, Student"></label>
+    <label>Visibility
+      <select name="visibility">
+        <option value="public">Public comment</option>
+        <option value="testimonial">Public testimonial</option>
+        <option value="private">Private message</option>
+      </select>
+    </label>
+    <label>Message<textarea name="message" rows="5" required></textarea></label>
+    <button class="button primary" type="submit">Send</button>
+  </form>
+</section>
+{{ render_blocks(page_blocks.get("main", [])) }}
+
+<section class="page-section">
+  {{ render_blocks(page_blocks.get("testimonials_intro", [])) }}
+  <div class="testimonial-grid">
+    {% for item in testimonials %}
+    <article class="testimonial reveal">
+      <strong>{{ item.name }}</strong>
+      <span>{{ country_flag(item.country_code) }} {{ item.role }}{% if item.country_name %} · {{ item.country_name }}{% endif %}</span>
+      <p>{{ item.quote }}</p>
+    </article>
+    {% else %}
+    <article class="empty-state reveal">No testimonials yet.</article>
+    {% endfor %}
+  </div>
+</section>
+{{ render_blocks(page_blocks.get("bottom", [])) }}
+{% endblock %}

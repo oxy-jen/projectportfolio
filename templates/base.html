@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Oxy-Jen Tech{% endblock %}</title>
+  <meta name="description" content="Oxy-Jen Tech, a futuristic developer portfolio and technology ecosystem powered by Flask and live GitHub data.">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  <script>
+    document.documentElement.dataset.theme = localStorage.getItem("oxyTheme") || "warm";
+  </script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=dual-theme-1">
+</head>
+<body>
+  <div class="loader" id="loader">
+    <div class="loader-card">
+      <span id="loaderText">Initializing Oxy-Jen Tech...</span>
+      <div class="loader-bar"><i id="loaderBar"></i></div>
+    </div>
+  </div>
+  <header class="site-header">
+    <div class="scroll-line" id="scrollLine"></div>
+    <nav class="nav">
+      <a class="brand" href="{{ url_for('home') }}">{{ site_settings.brand_name }}</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu"><i data-lucide="menu"></i></button>
+      <div class="nav-links" id="navLinks">
+        <a href="{{ url_for('home') }}">{{ site_settings.nav_home }}</a>
+        <a href="{{ url_for('about') }}">{{ site_settings.nav_about }}</a>
+        <a href="{{ url_for('projects') }}">{{ site_settings.nav_projects }}</a>
+        <a href="{{ url_for('ecosystem') }}">{{ site_settings.nav_ecosystem }}</a>
+        <a href="{{ url_for('community') }}">{{ site_settings.nav_community }}</a>
+        <a href="{{ url_for('contact') }}">{{ site_settings.nav_contact }}</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Switch portfolio theme"><i data-lucide="palette"></i><span id="themeLabel">Warm</span></button>
+        <a class="github-btn" href="https://github.com/oxy-jen" target="_blank" rel="noreferrer"><i data-lucide="code-2"></i>{{ site_settings.nav_github }}</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-stack">
+          {% for message in messages %}<div class="toast">{{ message }}</div>{% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="glow-rule"></div>
+    <div>
+      <strong>{{ site_settings.brand_name }}</strong>
+      <p>{{ site_settings.footer_bio }}</p>
+    </div>
+    <div class="footer-links">
+      <a href="{{ url_for('projects') }}">{{ site_settings.nav_projects }}</a>
+      <a href="{{ url_for('about') }}">{{ site_settings.nav_about }}</a>
+      <a href="{{ url_for('ecosystem') }}">{{ site_settings.nav_ecosystem }}</a>
+      <a href="{{ url_for('community') }}">{{ site_settings.nav_community }}</a>
+      <a href="{{ url_for('contact') }}">{{ site_settings.nav_contact }}</a>
+      <a href="https://github.com/oxy-jen" target="_blank" rel="noreferrer">{{ site_settings.nav_github }}</a>
+    </div>
+    {% if public_contacts %}
+    <div class="contact-pills">
+      {% for item in public_contacts %}
+      <a href="{{ item.url }}" target="_blank" rel="noreferrer">{{ item.label }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <p class="footer-location">{{ country_flag(site_settings.country_code) }} {{ site_settings.location_name }} · {{ site_settings.collaboration_note }}</p>
+    <small>Copyright {{ 2026 }} {{ site_settings.brand_name }}.</small>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/typed.js@2.1.0/dist/typed.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
