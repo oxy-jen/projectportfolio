@@ -93,6 +93,81 @@ html[data-theme="light"] body {
     linear-gradient(135deg, #fffaf2 0%, #f6eee3 54%, #efe3d3 100%);
 }
 
+
+.hero-profile {
+  padding-top: 2rem;
+}
+
+.hero-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+  border-radius: 28px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  backdrop-filter: blur(18px);
+}
+
+.github-avatar {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(255,255,255,.1);
+  box-shadow: 0 0 40px rgba(0,0,0,.35);
+}
+
+.hero-profile-info {
+  flex: 1;
+}
+
+.hero-profile-info h1 {
+  font-size: 2.5rem;
+  margin: .5rem 0;
+}
+
+.hero-profile-info p {
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 700px;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-stats article {
+  padding: 1rem 1.4rem;
+  border-radius: 18px;
+  background: rgba(255,255,255,.04);
+  min-width: 120px;
+}
+
+.hero-stats strong {
+  display: block;
+  font-size: 1.5rem;
+}
+
+.hero-stats span {
+  color: var(--muted);
+}
+
+@media (max-width: 768px) {
+  .hero-profile-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .hero-stats {
+    justify-content: center;
+  }
+}
+
+
 a { color: inherit; text-decoration: none; }
 button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
